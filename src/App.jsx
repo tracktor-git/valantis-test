@@ -13,7 +13,7 @@ const generateApiPassword = () => {
     .split('.')
     .reverse()
     .join('');
-  
+
   return `Valantis_${date}`;
 };
 
@@ -26,48 +26,67 @@ const axiosOptions = {
   },
 };
 
-const chunk = (array, size) => {
-  const chunks = [];
-  
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
+const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
+  if (index % size === 0) {
+    const part = array.slice(index, index + size);
+    return [...acc, part];
   }
-  
-  return chunks;
-}
+  return acc;
+}, []);
 
 const generatePages = (ids, limit) => {
-    const pages = chunk(ids, limit);
-    return pages.reduce((acc, array, index) => ({ ...acc, [index + 1] : array }), {});
+  const pages = chunk(ids, limit);
+  return pages.reduce((acc, array, index) => ({ ...acc, [index + 1]: array }), {});
 };
 
 const getAllIDs = async (attempts = 1) => {
+  const emptyResult = [];
+
   try {
     const { data } = await axios.post(API_URL, { action: 'get_ids', params: { offset: 1 } }, axiosOptions);
     const ids = Array.from(new Set(data.result));
     return ids;
-  } catch(error) {
-    console.warn(attempts, 'Не удалось получить список ID', error?.response?.data);    
-    if (attempts < 5) {
-      return await getAllIDs(attempts + 1);
+  } catch (error) {
+    if (!(error instanceof axios.AxiosError)) {
+      console.error('Ошибка при получении идентификаторов товаров:', error.message);
+      return emptyResult;
     }
-    return [];
+
+    console.warn(attempts, 'Не удалось получить список ID', error.response.data);
+
+    if (attempts < 5) {
+      const retryResult = await getAllIDs(attempts + 1);
+      return retryResult;
+    }
+
+    return emptyResult;
   }
 };
 
 const getItems = async (pages, page, attempts = 1) => {
+  const emptyResult = [];
+
   try {
     const newProducts = await axios.post(API_URL, { action: 'get_items', params: { ids: pages[page] } }, axiosOptions);
     const data = newProducts.data.result;
-    const filteredData = data.filter((product, index) => index === data.findIndex((item) => item.id === product.id));
+    const filteredData = data
+      .filter((product, index) => index === data.findIndex((item) => item.id === product.id));
     return filteredData;
-  } catch(error) {
-    console.warn(attempts, 'Не удалось получить список товаров -->', error?.response?.data);
-    if (attempts < 5) {
-      return await getItems(pages, page, attempts + 1);
+  } catch (error) {
+    if (!(error instanceof axios.AxiosError)) {
+      console.error('Ошибка при получении списка товаров:', error.message);
+      return emptyResult;
     }
-    return [];
-  }  
+
+    console.warn(attempts, 'Не удалось получить список товаров', error.response.data);
+
+    if (attempts < 5) {
+      const retryResult = await getItems(pages, page, attempts + 1);
+      return retryResult;
+    }
+
+    return emptyResult;
+  }
 };
 
 const Page = ({ pagesCount, pageNumber }) => {
@@ -75,16 +94,17 @@ const Page = ({ pagesCount, pageNumber }) => {
     return <Loader />;
   }
 
-  return <span>Страница {pageNumber} из {pagesCount}</span>;
+  return <span>{`Страница ${pageNumber} из ${pagesCount}`}</span>;
 };
+
+const DATA_LIMIT = 50;
 
 const App = () => {
   const [products, setProducts] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [pageNumber, setPageNumber] = React.useState(0);
+  const [currentPageNumber, setCurrentPageNumber] = React.useState(0);
   const [pages, setPages] = React.useState({});
 
-  const DATA_LIMIT = 50;
   const pagesCount = Object.keys(pages).length;
 
   React.useEffect(() => {
@@ -104,7 +124,7 @@ const App = () => {
         const items = await getItems(pages, 1);
         setProducts(items);
         if (items.length) {
-          setPageNumber(1);
+          setCurrentPageNumber(1);
         }
         setIsLoading(false);
       };
@@ -113,19 +133,14 @@ const App = () => {
     }
   }, [pagesCount, pages]);
 
-  const handleChangePage = async (direction) => {
-    const map = {
-      next: pageNumber + 1,
-      previous: pageNumber - 1,
-    };
-
-    const newPageNumber = map[direction];
+  const handleChangePage = async (pageNumber) => {
     setIsLoading(true);
-    const items = await getItems(pages, newPageNumber);
+
+    const items = await getItems(pages, pageNumber);
     setProducts(items);
 
     if (items.length) {
-      setPageNumber(newPageNumber);
+      setCurrentPageNumber(pageNumber);
     }
 
     setIsLoading(false);
@@ -136,27 +151,27 @@ const App = () => {
       <div className="container">
         <Header />
         <Paginator
-          onNextClick={() => handleChangePage('next')}
-          onPreviousClick={() => handleChangePage('previous')}
-          isNextDisabled={pageNumber === pagesCount || isLoading}
-          isPrevDisabled={pageNumber === 1 || isLoading}
+          onNextClick={() => handleChangePage(currentPageNumber + 1)}
+          onPreviousClick={() => handleChangePage(currentPageNumber - 1)}
+          isNextDisabled={currentPageNumber === pagesCount || isLoading}
+          isPrevDisabled={currentPageNumber === 1 || isLoading}
         >
           {
-            isLoading ?
-              <Loader /> :
-              <Page pagesCount={pagesCount} pageNumber={pageNumber} />
+            isLoading
+              ? <Loader />
+              : <Page pagesCount={pagesCount} pageNumber={currentPageNumber} />
           }
         </Paginator>
         <div className="products-wrapper">
           {
             products.length > 0 ? (
-              products.map((product) => <ProductItem key={product.id} data={product}/>)
+              products.map((product) => <ProductItem key={product.id} data={product} />)
             ) : 'Нет товаров для отображения'
           }
         </div>
       </div>
     </main>
   );
-}
+};
 
 export default App;
