@@ -1,4 +1,4 @@
-import noImage from './no-image.png';
+import noImage from '../assets/images/no-image.png';
 
 const ProductItem = ({ data }) => {
 	const {

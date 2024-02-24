@@ -2,11 +2,10 @@ import React from 'react';
 import axios from 'axios';
 import md5 from 'md5';
 
-import Loader from './Loader';
-import ProductItem from './ProductItem';
-import Paginator from './Paginator';
-
-import logo from './logo.svg';
+import Loader from './Components/Loader';
+import ProductItem from './Components/ProductItem';
+import Paginator from './Components/Paginator';
+import Header from './Components/Header';
 
 const generateApiPassword = () => {
   const date = new Date()
@@ -27,118 +26,132 @@ const axiosOptions = {
   },
 };
 
+const chunk = (array, size) => {
+  const chunks = [];
+  
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  
+  return chunks;
+}
+
+const generatePages = (ids, limit) => {
+    const pages = chunk(ids, limit);
+    return pages.reduce((acc, array, index) => ({ ...acc, [index + 1] : array }), {});
+};
+
+const getAllIDs = async (attempts = 1) => {
+  try {
+    const { data } = await axios.post(API_URL, { action: 'get_ids', params: { offset: 1 } }, axiosOptions);
+    const ids = Array.from(new Set(data.result));
+    return ids;
+  } catch(error) {
+    console.warn(attempts, 'Не удалось получить список ID', error?.response?.data);    
+    if (attempts < 5) {
+      return await getAllIDs(attempts + 1);
+    }
+    return [];
+  }
+};
+
+const getItems = async (pages, page, attempts = 1) => {
+  try {
+    const newProducts = await axios.post(API_URL, { action: 'get_items', params: { ids: pages[page] } }, axiosOptions);
+    const data = newProducts.data.result;
+    const filteredData = data.filter((product, index) => index === data.findIndex((item) => item.id === product.id));
+    return filteredData;
+  } catch(error) {
+    console.warn(attempts, 'Не удалось получить список товаров -->', error?.response?.data);
+    if (attempts < 5) {
+      return await getItems(pages, page, attempts + 1);
+    }
+    return [];
+  }  
+};
+
+const Page = ({ pagesCount, pageNumber }) => {
+  if (!pagesCount) {
+    return <Loader />;
+  }
+
+  return <span>Страница {pageNumber} из {pagesCount}</span>;
+};
+
 const App = () => {
   const [products, setProducts] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [pageNumber, setPageNumber] = React.useState(0);
+  const [pages, setPages] = React.useState({});
 
   const DATA_LIMIT = 50;
-  const offsetRef = React.useRef(1);
+  const pagesCount = Object.keys(pages).length;
 
-  const getUniqIds = async () => {
-    const ids = [];
-    
-    const iter = async () => {
-      if (ids.length >= DATA_LIMIT) {
-        return;
-      }
-
-      const params = {
-        limit: DATA_LIMIT - ids.length,
-        offset: offsetRef.current,
-      };
-
-      try {
-        const response = await axios.post(API_URL, { action: 'get_ids', params }, axiosOptions);
-
-        if (!response.data.result) {
-          return;
-        }
-
-        const uniqIDs = Array.from(new Set(response.data.result));
-        uniqIDs.forEach((id) => {
-          if (!ids.includes(id)) {
-            ids.push(id);
-          }
-        });
-
-        offsetRef.current += DATA_LIMIT;
-        
-        await iter();
-      } catch(error) {
-        if (error instanceof axios.AxiosError) {
-          if (error.response.status === 401) {
-            console.log('Ошибка авторизации API', error.response.data);
-            return [];
-          }
-          console.warn('Ошибка получения данных, ИД', error?.response?.data);
-          await iter();
-        } else {
-          console.log('Произошла сетевая ошибка');
-        }
-      }
+  React.useEffect(() => {
+    const fetchIds = async () => {
+      const ids = await getAllIDs();
+      const result = generatePages(ids, DATA_LIMIT);
+      setPages(result);
     };
 
-    await iter();
+    fetchIds();
+  }, []);
 
-    return ids;
-  };
-
-  const getProducts = async () => {
-    try {
-      const ids = await getUniqIds();
-      const response = await axios.post(API_URL, { action: 'get_items', params: { ids } }, axiosOptions);
-      const data = response.data.result;
-      const filteredData = data.filter((product, index) => index === data.findIndex((item) => item.id === product.id));
-      return filteredData;
-    } catch(error) {
-      if (error instanceof axios.AxiosError) {
-        if (error.response.status === 401) {
-          console.log('Ошибка авторизации API', error.response.data);
-          return [];
+  React.useEffect(() => {
+    if (pagesCount > 0) {
+      const setItems = async () => {
+        setIsLoading(true);
+        const items = await getItems(pages, 1);
+        setProducts(items);
+        if (items.length) {
+          setPageNumber(1);
         }
-        console.warn('Ошибка получения продуктов, ИД ошибки:', error?.response?.data);
-        const items = await getProducts();
-        return items;
-      } else {
-        console.log('Произошла сетевая ошибка');
-      }
+        setIsLoading(false);
+      };
+
+      setItems();
     }
-  };
+  }, [pagesCount, pages]);
 
-  const handleGetProducts = async () => {
-    setIsLoading(true);
-    const newProducts = await getProducts();
-    setProducts(newProducts);
-    setPageNumber((previousPageNumber) => previousPageNumber + 1);
-    setIsLoading(false);
-  };
+  const handleChangePage = async (direction) => {
+    const map = {
+      next: pageNumber + 1,
+      previous: pageNumber - 1,
+    };
 
-  const handleGetPrevious = async () => {
-    offsetRef.current = offsetRef.current + 1 - (DATA_LIMIT * 2);
+    const newPageNumber = map[direction];
     setIsLoading(true);
-    const newProducts = await getProducts();
-    setProducts(newProducts);
-    setPageNumber((previousPageNumber) => previousPageNumber - 1);
+    const items = await getItems(pages, newPageNumber);
+    setProducts(items);
+
+    if (items.length) {
+      setPageNumber(newPageNumber);
+    }
+
     setIsLoading(false);
   };
 
   return (
     <main>
       <div className="container">
-        <div className="logo">
-        <h1>Ювелирная мастерская</h1>
-          <a href="./">
-            <img src={logo} alt="Valantis logo" />
-          </a>
-        </div>
-        <Paginator onNextClick={handleGetProducts} onPreviousClick={handleGetPrevious} pageNumber={pageNumber} isNextDisabled={isLoading} />
-        {isLoading && <Loader />}
+        <Header />
+        <Paginator
+          onNextClick={() => handleChangePage('next')}
+          onPreviousClick={() => handleChangePage('previous')}
+          isNextDisabled={pageNumber === pagesCount || isLoading}
+          isPrevDisabled={pageNumber === 1 || isLoading}
+        >
+          {
+            isLoading ?
+              <Loader /> :
+              <Page pagesCount={pagesCount} pageNumber={pageNumber} />
+          }
+        </Paginator>
         <div className="products-wrapper">
           {
-            products.length > 0 && (
+            products.length > 0 ? (
               products.map((product) => <ProductItem key={product.id} data={product}/>)
-            )
+            ) : 'Нет товаров для отображения'
           }
         </div>
       </div>

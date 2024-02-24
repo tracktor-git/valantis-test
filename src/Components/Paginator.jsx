@@ -1,12 +1,19 @@
-const Paginator = ({ onNextClick, onPreviousClick, pageNumber, isNextDisabled }) => {
-    const isPreviousDisabled = !pageNumber || pageNumber === 1;
+const Paginator = (props) => {
+    const {
+        onNextClick,
+        onPreviousClick,
+        isNextDisabled,
+        isPrevDisabled,
+        children
+    } = props;
+
     return (
         <div className="paginator">
             <div className="paginator-wrapper">
-                <button className="page-button previous" disabled={isPreviousDisabled} onClick={onPreviousClick}>
+                <button className="page-button previous" disabled={isPrevDisabled} onClick={onPreviousClick}>
                     <span>&#8249;</span>
                 </button>
-                <div className="page-number">{pageNumber || 0}</div>
+                <div className="page-number">{children}</div>
                 <button className="page-button next" onClick={onNextClick} disabled={isNextDisabled}>
                     <span>&#8250;</span>
                 </button>

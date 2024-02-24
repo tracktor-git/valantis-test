@@ -26,29 +26,35 @@ h1 {
 .products-wrapper {
 	display: flex;
 	align-items: center;
-	justify-content: space-around;
-	gap: 15px;
+	justify-content: center;
 	flex-wrap: wrap;
+	gap: 15px;
 }
 
 .product-card {
 	display: flex;
-	padding: 8px;
 	flex-direction: column;
 	justify-content: space-between;
 	align-items: center;
+	text-align: center;
+	background-color: #fafafa;
+	padding: 8px;
 	width: 225px;
 	height: 225px;
 	border: 1px solid #bdbdbd;
 	border-radius: 3px;
-	background-color: #fafafa;
-	text-align: center;
+	cursor: pointer;
+	transition: transform 0.2s linear;
+}
+
+.product-card:hover {
+	transform: scale(1.05);
 }
 
 .product-image {
-	user-select: none;
 	width: 70px;
 	height: 70px;
+	user-select: none;
 }
 
 .product-image img {
@@ -60,7 +66,6 @@ h1 {
 	font-weight: bold;
 	font-size: 13px;
 	text-transform: uppercase;
-	
 }
 
 .product-id {
@@ -80,20 +85,22 @@ h1 {
 /* PAGINATOR */
 .paginator-wrapper {
 	display: flex;
+	justify-content: space-between;
 	align-items: center;
-	text-align: center;
-	justify-content: center;
 	gap: 20px;
+	text-align: center;
 	padding: 20px;
+	width: 370px;
+	margin: 0 auto;
 }
 
 .page-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
 	font-family: 'Roboto', sans-serif;
 	font-size: 24px;
-	display: flex;
-	text-align: center;
-	align-items: center;
-	justify-content: center;
 	border: 1px solid #ccc;
 	border-radius: 50%;
 	width: 20px;
@@ -129,13 +136,13 @@ h1 {
 
 /* LOADER */
 .loader {
-	width: 50px;
-	height: 50px;
-	border: 10px solid tomato;
-	border-top: 10px solid #eb9e91;
+	width: 28px;
+	height: 28px;
+	margin: 0 auto;
+	border: 6px solid #747272;
+	border-top-color: #c0c0c0;
 	border-radius: 50%;
 	animation: rotateLoader infinite 1s linear;
-	margin: 0 auto;
 }
 
 @keyframes rotateLoader {
@@ -145,4 +152,14 @@ h1 {
 	100% {
 	  transform: rotate(360deg);
 	}
+}
+
+input.page-number {
+	width: 70px;
+	margin: 0 5px;
+	padding: 5px;
+	text-align: center;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	outline: none;
 }
