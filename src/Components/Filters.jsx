@@ -1,9 +1,9 @@
 import React from 'react';
 import { getBrands } from '../utils';
 
-const BrandFilter = ({ applyFilters }) => {
+const BrandFilter = ({ handleFilters }) => {
   const [brands, setBrands] = React.useState([]);
-  const [selectedBrand, setSelectedBrand] = React.useState();
+  const [selectedBrand, setSelectedBrand] = React.useState('');
 
   const handleSelectChange = (event) => {
     setSelectedBrand(event.target.value);
@@ -11,7 +11,7 @@ const BrandFilter = ({ applyFilters }) => {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const data = await getBrands();
+      const data = await getBrands() || [];
       setBrands(data);
     };
 
@@ -19,24 +19,24 @@ const BrandFilter = ({ applyFilters }) => {
   }, []);
 
   const handleApplyFilters = () => {
-    applyFilters('brand', selectedBrand);
+    handleFilters('apply', 'brand', selectedBrand);
   };
 
   return (
     <>
       <select className="select-brand" onChange={handleSelectChange} value={selectedBrand}>
         <option value="pickBrand" disabled>Выберите наименование бренда</option>
-        <option value={null}>Без бренда</option>
+        <option value="">Без бренда</option>
         {
             brands.map((value) => <option key={Math.random()} value={value}>{value}</option>)
         }
       </select>
-      <button className="apply-filters" type="button" onClick={handleApplyFilters}>Применить фильтры</button>
+      <button className="apply-filters" type="button" onClick={handleApplyFilters}>Применить фильтр</button>
     </>
   );
 };
 
-const PriceFilter = ({ applyFilters }) => {
+const PriceFilter = ({ handleFilters }) => {
   const [productPrice, setProductPrice] = React.useState(0);
 
   const handleChangePrice = (event) => {
@@ -45,18 +45,18 @@ const PriceFilter = ({ applyFilters }) => {
 
   const handleApplyFilters = (event) => {
     event.preventDefault();
-    applyFilters('price', productPrice);
+    handleFilters('apply', 'price', productPrice);
   };
 
   return (
     <form className="filters-form" onSubmit={handleApplyFilters}>
       <input className="product-price-input" type="number" placeholder="Цена товара" min={0} onChange={handleChangePrice} required />
-      <button className="apply-filters" type="submit">Применить фильтры</button>
+      <button className="apply-filters" type="submit">Применить фильтр</button>
     </form>
   );
 };
 
-const ProductNameFilter = ({ applyFilters }) => {
+const ProductNameFilter = ({ handleFilters }) => {
   const [productName, setProductName] = React.useState(null);
 
   const handleChangeName = (event) => {
@@ -65,38 +65,53 @@ const ProductNameFilter = ({ applyFilters }) => {
 
   const handleApplyFilters = (event) => {
     event.preventDefault();
-    applyFilters('product', productName);
+    handleFilters('apply', 'product', productName);
   };
 
   return (
     <form className="filters-form" onSubmit={handleApplyFilters}>
       <input className="product-name-input" type="text" placeholder="Наименование товара" onChange={handleChangeName} required />
-      <button className="apply-filters" type="submit">Применить фильтры</button>
+      <button className="apply-filters" type="submit">Применить фильтр</button>
     </form>
   );
 };
 
-const Filters = ({ applyFilters }) => {
-  const [selectedFilter, setSelectedFilter] = React.useState('price');
+const Filters = ({ isFiltered, handleFilters }) => {
+  const [selectedFilter, setSelectedFilter] = React.useState('');
+  const selectRef = React.useRef(null);
 
   const filterMap = {
-    brand: <BrandFilter applyFilters={applyFilters} />,
-    price: <PriceFilter applyFilters={applyFilters} />,
-    productName: <ProductNameFilter applyFilters={applyFilters} />,
+    brand: <BrandFilter handleFilters={handleFilters} />,
+    price: <PriceFilter handleFilters={handleFilters} />,
+    productName: <ProductNameFilter handleFilters={handleFilters} />,
   };
 
   const handleChangeFilter = (event) => {
     setSelectedFilter(event.target.value);
   };
 
+  const handleClearFilters = () => {
+    handleFilters('clear');
+    setSelectedFilter('');
+    selectRef.current.value = '';
+  };
+
   return (
     <div className="filters">
-      <select onChange={handleChangeFilter} defaultValue={selectedFilter}>
+      <span>Фильтровать данные:</span>
+
+      <select ref={selectRef} defaultValue={selectedFilter} onChange={handleChangeFilter}>
+        <option value="" disabled>Выберите фильтр</option>
         <option value="brand">По бренду</option>
         <option value="price">По цене</option>
         <option value="productName">По наименованию товара</option>
       </select>
+
       {filterMap[selectedFilter]}
+
+      <button type="button" className="clear-filters" onClick={handleClearFilters} disabled={!isFiltered}>
+        Очистить фильтр
+      </button>
     </div>
   );
 };

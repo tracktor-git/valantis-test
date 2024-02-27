@@ -12,8 +12,10 @@ body {
 	font-size: 14px;
 }
 
-h1 {
-  text-align: center;
+.header-title {
+	font-size: 26px;
+	text-align: center;
+	color: #20232e;
 }
 
 .container {
@@ -212,7 +214,8 @@ select {
 .filters select,
 .product-name-input,
 .product-price-input,
-.apply-filters {
+.apply-filters,
+.clear-filters {
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
@@ -220,12 +223,14 @@ select {
 	appearance: none;
 }
 
-.apply-filters {
+.apply-filters,
+.clear-filters {
 	cursor: pointer;
 	transition: transform .1s ease-in;
 }
 
-.apply-filters:active {
+.apply-filters:not([disabled]):active,
+.clear-filters:not([disabled]):active {
 	transform: translateY(-2px);
 }
 

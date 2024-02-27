@@ -1,7 +1,7 @@
 import axios from 'axios';
 import md5 from 'md5';
 
-export const generateApiPassword = () => {
+const generateApiPassword = () => {
   const apiKey = process.env.REACT_APP_API_KEY;
   const date = new Date()
     .toLocaleDateString('ru-RU')
@@ -13,7 +13,10 @@ export const generateApiPassword = () => {
   return encryptedPassword;
 };
 
-const API_URL = 'http://api.valantis.store:40000/';
+const API_URL = process.env.NODE_ENV === 'development'
+  ? 'http://api.valantis.store:40000/'
+  : 'https://api.valantis.store:41000/';
+
 const API_PASSWORD = generateApiPassword();
 
 const axiosOptions = {
@@ -31,13 +34,14 @@ const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
 }, []);
 
 export const generatePages = (ids, limit) => {
+  // Если не будет ни одного id - то это пустая 1-я страница без id
+  const initialAcc = { 1: [] };
+
   const pages = chunk(ids, limit);
-  return pages.reduce((acc, array, index) => ({ ...acc, [index + 1]: array }), {});
+  return pages.reduce((acc, array, index) => ({ ...acc, [index + 1]: array }), initialAcc);
 };
 
 export const getBrands = async (attempts = 1) => {
-  const emptyResult = [];
-
   try {
     const response = await await axios.post(API_URL, { action: 'get_fields', params: { field: 'brand' } }, axiosOptions);
     const brands = Array.from(new Set(response.data.result.filter((name) => name !== null)));
@@ -45,12 +49,10 @@ export const getBrands = async (attempts = 1) => {
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении наименований брендов:', error.message);
-      return emptyResult;
     }
 
     if (error.code === 'ERR_NETWORK') {
       console.error('Ошибка сети', error.message);
-      return emptyResult;
     }
 
     console.warn(attempts, 'Не удалось получить список наименований брендов', error.response.data);
@@ -59,14 +61,11 @@ export const getBrands = async (attempts = 1) => {
       const retryResult = await getBrands(attempts + 1);
       return retryResult;
     }
-
-    return emptyResult;
   }
+  return null;
 };
 
 export const getAllIDs = async (attempts = 1) => {
-  const emptyResult = [];
-
   try {
     const { data } = await axios.post(API_URL, { action: 'get_ids', params: { offset: 1 } }, axiosOptions);
     const ids = Array.from(new Set(data.result));
@@ -74,28 +73,22 @@ export const getAllIDs = async (attempts = 1) => {
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении идентификаторов товаров:', error.message);
-      return emptyResult;
     }
 
     if (error.code === 'ERR_NETWORK') {
       console.error('Ошибка сети', error.message);
-      return emptyResult;
     }
 
-    console.warn(attempts, 'Не удалось получить список ID', error.response.data);
-
     if (attempts < 5) {
+      console.warn(attempts, 'Не удалось получить список ID', error.response.data);
       const retryResult = await getAllIDs(attempts + 1);
       return retryResult;
     }
-
-    return emptyResult;
   }
+  return null;
 };
 
 export const getItems = async (pages, page, attempts = 1) => {
-  const emptyResult = [];
-
   try {
     const newProducts = await axios.post(API_URL, { action: 'get_items', params: { ids: pages[page] } }, axiosOptions);
     const data = newProducts.data.result;
@@ -105,12 +98,10 @@ export const getItems = async (pages, page, attempts = 1) => {
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении списка товаров:', error.message);
-      return emptyResult;
     }
 
     if (error.code === 'ERR_NETWORK') {
       console.error('Ошибка сети', error.message);
-      return emptyResult;
     }
 
     console.warn(attempts, 'Не удалось получить список товаров', error.response.data);
@@ -119,9 +110,8 @@ export const getItems = async (pages, page, attempts = 1) => {
       const retryResult = await getItems(pages, page, attempts + 1);
       return retryResult;
     }
-
-    return emptyResult;
   }
+  return null;
 };
 
 export const filterItems = async (field, value, attempts = 1) => {
@@ -132,20 +122,18 @@ export const filterItems = async (field, value, attempts = 1) => {
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении фильтрованных данных:', error.message);
-      return [];
     }
 
     if (error.code === 'ERR_NETWORK') {
       console.error('Ошибка сети', error.message);
-      return [];
     }
-    console.warn(attempts, 'Не удалось получить фильтрованные данные', error?.response?.data);
+
+    console.warn(attempts, 'Не удалось получить фильтрованные данные', error.response.data);
 
     if (attempts < 5) {
       const retryResult = await filterItems(field, value, attempts + 1);
       return retryResult;
     }
-
-    return [];
   }
+  return null;
 };
