@@ -4,7 +4,7 @@ import md5 from 'md5';
 const generateApiPassword = () => {
   const apiKey = process.env.REACT_APP_API_KEY;
   const date = new Date()
-    .toLocaleDateString('ru-RU')
+    .toLocaleDateString('ru-RU', { timeZone: 'UTC' })
     .split('.')
     .reverse()
     .join('');
