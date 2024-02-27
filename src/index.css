@@ -163,3 +163,76 @@ input.page-number {
 	border-radius: 3px;
 	outline: none;
 }
+
+@media (max-width: 495px) {
+	.product-card {
+		width: 370px;
+		height: 370px;
+	}
+
+	.product-card:hover {
+		transform: none;
+	}
+
+	.product-title {
+		font-size: 24px;
+	}
+
+	.product-id {
+		font-size: 14px;
+	}
+
+	.product-image {
+		width: 130px;
+		height: 130px;
+	}
+
+	.product-brand {
+		font-size: 22px;
+	}
+
+	.product-price {
+		font-size: 24px;
+	}
+}
+
+/* FILTERS */
+.filters {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 10px 0 15px 0;
+	gap: 15px;
+}
+
+select {
+	cursor: pointer;
+}
+
+.filters select,
+.product-name-input,
+.product-price-input,
+.apply-filters {
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	outline: none;
+	appearance: none;
+}
+
+.apply-filters {
+	cursor: pointer;
+	transition: transform .1s ease-in;
+}
+
+.apply-filters:active {
+	transform: translateY(-2px);
+}
+
+.filters-form {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+}
+

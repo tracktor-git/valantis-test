@@ -8,7 +8,9 @@ const ProductItem = ({ data }) => {
     product,
   } = data;
 
-  const formattedPrice = price.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' });
+  const formattedPrice = price
+    ? price.toLocaleString('ru-RU', { style: 'currency', currency: 'RUB' })
+    : 'Не указана';
 
   return (
     <div className="products-wrapper">
@@ -29,7 +31,7 @@ const ProductItem = ({ data }) => {
 
         <div className="product-price">
           <strong>Цена:</strong>
-          <span>{` ${formattedPrice || 'Не указана'}`}</span>
+          <span>{` ${formattedPrice}`}</span>
         </div>
 
       </div>
