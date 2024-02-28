@@ -1,15 +1,24 @@
 import ProductItem from './ProductItem';
+import Loader from './Loader';
 
 const Products = ({ products, isLoading }) => {
   if (isLoading) {
-    return <span>Товары загружаются...</span>;
+    return <Loader />;
   }
 
   if (!products.length) {
-    return <span>Нет товаров для отображения</span>;
+    return (
+      <div className="products-wrapper">
+        <span>Нет товаров для отображения</span>
+      </div>
+    );
   }
 
-  return products.map((product) => <ProductItem key={product.id} data={product} />);
+  return (
+    <div className="products-wrapper">
+      {products.map((product) => <ProductItem key={product.id} data={product} />)}
+    </div>
+  );
 };
 
 export default Products;

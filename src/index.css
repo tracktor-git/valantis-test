@@ -12,6 +12,10 @@ body {
 	font-size: 14px;
 }
 
+button[disabled] {
+	cursor: not-allowed;
+}
+
 .header-title {
 	font-size: 26px;
 	text-align: center;
@@ -214,8 +218,8 @@ select {
 .filters select,
 .product-name-input,
 .product-price-input,
-.apply-filters,
-.clear-filters {
+.apply-filter,
+.clear-filter {
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 4px;
@@ -223,14 +227,14 @@ select {
 	appearance: none;
 }
 
-.apply-filters,
-.clear-filters {
+.apply-filter,
+.clear-filter {
 	cursor: pointer;
 	transition: transform .1s ease-in;
 }
 
-.apply-filters:not([disabled]):active,
-.clear-filters:not([disabled]):active {
+.apply-filter:not([disabled]):active,
+.clear-filter:not([disabled]):active {
 	transform: translateY(-2px);
 }
 
