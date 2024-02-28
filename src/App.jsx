@@ -5,7 +5,7 @@ import Header from './Components/Header';
 import Filters from './Components/Filters';
 
 import {
-  generatePages, getAllIDs, getItems, filterItems,
+  generatePages, getAllIDs, getItems, getFilteredIDs,
 } from './utils';
 import Products from './Components/Products';
 
@@ -52,7 +52,7 @@ const App = () => {
 
   const handleFilters = async (mode, field, value) => {
     const filter = {
-      apply: () => filterItems(field, value) || [],
+      apply: () => getFilteredIDs(field, value) || [],
       clear: () => getAllIDs() || [],
     };
 

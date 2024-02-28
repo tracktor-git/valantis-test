@@ -114,7 +114,7 @@ export const getItems = async (pages, page, attempts = 1) => {
   return null;
 };
 
-export const filterItems = async (field, value, attempts = 1) => {
+export const getFilteredIDs = async (field, value, attempts = 1) => {
   try {
     const response = await axios.post(API_URL, { action: 'filter', params: { [field]: value || null } }, axiosOptions);
     const ids = response.data.result;
@@ -131,7 +131,7 @@ export const filterItems = async (field, value, attempts = 1) => {
     console.warn(attempts, 'Не удалось получить фильтрованные данные', error.response.data);
 
     if (attempts < 5) {
-      const retryResult = await filterItems(field, value, attempts + 1);
+      const retryResult = await getFilteredIDs(field, value, attempts + 1);
       return retryResult;
     }
   }
