@@ -51,27 +51,27 @@ const App = () => {
   };
 
   const handleFilters = async (mode, field, value) => {
-    const filter = {
+    const actions = {
       apply: () => getFilteredIDs(field, value) || [],
       clear: () => getAllIDs() || [],
     };
 
     setIsLoading(true);
 
-    const getIds = filter[mode];
+    const getIds = actions[mode];
     const ids = await getIds();
     const newPages = generatePages(ids, DATA_LIMIT);
     setPages(newPages);
 
     // Запрашиваем товары только если есть id
     if (ids.length) {
-      const items = await getItems(newPages, 1) || [];
+      const items = await getItems(newPages, START_PAGE_NUMBER) || [];
       setProducts(items);
     } else {
       setProducts([]);
     }
 
-    setCurrentPageNumber(1);
+    setCurrentPageNumber(START_PAGE_NUMBER);
     setIsFiltered(mode === 'apply');
 
     setIsLoading(false);
@@ -93,7 +93,7 @@ const App = () => {
               : <span>{`Страница ${currentPageNumber} из ${pagesCount}`}</span>
           }
         </Paginator>
-        <Filters handleFilters={handleFilters} isFiltered={isFiltered} />
+        <Filters handleFilters={handleFilters} isFiltered={isFiltered} isLoading={isLoading} />
         <div className="products-wrapper">
           <Products isLoading={isLoading} products={products} />
         </div>
