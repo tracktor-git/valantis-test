@@ -1,7 +1,7 @@
 import React from 'react';
-import { getBrands } from '../../utils';
-
 import styles from './Filters.module.css';
+
+import { getBrands } from '../../utils';
 
 const ApplyFilters = ({ isLoading, onClick }) => (
   <button className={styles.applyFilter} type="submit" disabled={isLoading} onClick={onClick}>
@@ -38,7 +38,7 @@ const BrandFilter = ({ isLoading, handleFilters }) => {
         <option value="pickBrand" disabled>Выберите наименование бренда</option>
         <option value="">Без бренда</option>
         {
-            brands.map((value) => <option key={Math.random()} value={value}>{value}</option>)
+          brands.map((value) => <option key={Math.random()} value={value}>{value}</option>)
         }
       </select>
       <ApplyFilters isLoading={isLoading} onClick={handleApplyFilters} />
@@ -91,6 +91,8 @@ const Filters = ({ isFiltered, isLoading, handleFilters }) => {
   const [selectedFilter, setSelectedFilter] = React.useState('');
   const selectRef = React.useRef(null);
 
+  const isDisabled = !isFiltered || isLoading;
+
   const filtersMap = {
     brand: <BrandFilter handleFilters={handleFilters} isLoading={isLoading} />,
     price: <PriceFilter handleFilters={handleFilters} isLoading={isLoading} />,
@@ -120,7 +122,7 @@ const Filters = ({ isFiltered, isLoading, handleFilters }) => {
 
       {filtersMap[selectedFilter]}
 
-      <button type="button" className={styles.clearFilter} onClick={handleClearFilters} disabled={!isFiltered || isLoading}>
+      <button type="button" className={styles.clearFilter} onClick={handleClearFilters} disabled={isDisabled}>
         Очистить фильтр
       </button>
     </div>
