@@ -1,5 +1,7 @@
-import ProductItem from './ProductItem';
-import Loader from './Loader';
+import ProductItem from '../ProductItem/ProductItem';
+import Loader from '../Loader/Loader';
+
+import styles from './Products.module.css';
 
 const Products = ({ products, isLoading }) => {
   if (isLoading) {
@@ -8,14 +10,14 @@ const Products = ({ products, isLoading }) => {
 
   if (!products.length) {
     return (
-      <div className="products-wrapper">
+      <div className={styles.productsWrapper}>
         <span>Нет товаров для отображения</span>
       </div>
     );
   }
 
   return (
-    <div className="products-wrapper">
+    <div className={styles.productsWrapper}>
       {products.map((product) => <ProductItem key={product.id} data={product} />)}
     </div>
   );

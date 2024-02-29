@@ -1,0 +1,37 @@
+.filters {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin: 10px 0 15px 0;
+	gap: 15px;
+}
+
+.filters select,
+.productName,
+.productPrice,
+.applyFilter,
+.clearFilter {
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	outline: none;
+	appearance: none;
+}
+
+.applyFilter,
+.clearFilter {
+	cursor: pointer;
+	transition: transform .1s ease-in;
+}
+
+.applyFilter:not([disabled]):active,
+.clearFilter:not([disabled]):active {
+	transform: translateY(-2px);
+}
+
+.filtersForm {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+}

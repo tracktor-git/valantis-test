@@ -25,7 +25,7 @@ const axiosOptions = {
   },
 };
 
-const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
+export const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
   if (index % size === 0) {
     const part = array.slice(index, index + size);
     return [...acc, part];
@@ -88,9 +88,11 @@ export const getAllIDs = async (attempts = 1) => {
   return null;
 };
 
-export const getItems = async (pages, page, attempts = 1) => {
+export const getItems = async (pages, pageNumber, attempts = 1) => {
+  const pageIndex = pageNumber - 1;
+
   try {
-    const newProducts = await axios.post(API_URL, { action: 'get_items', params: { ids: pages[page] } }, axiosOptions);
+    const newProducts = await axios.post(API_URL, { action: 'get_items', params: { ids: pages[pageIndex] } }, axiosOptions);
     const data = newProducts.data.result;
     const filteredData = data
       .filter((product, index) => index === data.findIndex((item) => item.id === product.id));
@@ -107,7 +109,7 @@ export const getItems = async (pages, page, attempts = 1) => {
     console.warn(attempts, 'Не удалось получить список товаров', error.response.data);
 
     if (attempts < 5) {
-      const retryResult = await getItems(pages, page, attempts + 1);
+      const retryResult = await getItems(pages, pageNumber, attempts + 1);
       return retryResult;
     }
   }

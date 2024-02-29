@@ -1,4 +1,5 @@
-import noImage from '../assets/images/no-image.png';
+import noImage from '../../assets/images/no-image.png';
+import styles from './ProductItem.module.css';
 
 const ProductItem = ({ data }) => {
   const {
@@ -13,22 +14,22 @@ const ProductItem = ({ data }) => {
     : 'Не указана';
 
   return (
-    <div className="product-card">
-      <div className="product-header">
-        <div className="product-title">{product || 'Нет названия'}</div>
-        <div className="product-id">{`ID: ${id || 'Нет ID'}`}</div>
+    <div className={styles.productCard}>
+      <div className={styles.productHeader}>
+        <div className={styles.productTitle}>{product || 'Нет названия'}</div>
+        <div className={styles.productId}>{`ID: ${id || 'Нет ID'}`}</div>
       </div>
 
-      <div className="product-image">
+      <div className={styles.productImage}>
         <img src={noImage} alt="Product" />
       </div>
 
-      <div className="product-brand">
+      <div className={styles.productBrand}>
         <strong>Бренд:</strong>
         <span>{` ${brand || 'Не указан'}`}</span>
       </div>
 
-      <div className="product-price">
+      <div className={styles.productPrice}>
         <strong>Цена:</strong>
         <span>{` ${formattedPrice}`}</span>
       </div>

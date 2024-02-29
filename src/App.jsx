@@ -1,11 +1,11 @@
 import React from 'react';
-import Paginator from './Components/Paginator';
-import Header from './Components/Header';
-import Filters from './Components/Filters';
-import Products from './Components/Products';
+import Paginator from './Components/Paginator/Paginator';
+import Header from './Components/Header/Header';
+import Filters from './Components/Filters/Filters';
+import Products from './Components/Products/Products';
 
 import {
-  generatePages, getAllIDs, getItems, getFilteredIDs,
+  chunk, getAllIDs, getItems, getFilteredIDs,
 } from './utils';
 
 const DATA_LIMIT = 50;
@@ -16,21 +16,21 @@ const App = () => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isFiltered, setIsFiltered] = React.useState(false);
   const [pageNumber, setPageNumber] = React.useState(START_PAGE_NUMBER);
-  const [pages, setPages] = React.useState({});
-
-  const pagesCount = Object.keys(pages).length;
+  const [pagesCount, setPagesCount] = React.useState(0);
+  const [pages, setPages] = React.useState([]);
 
   React.useEffect(() => {
     setIsLoading(true);
 
     getAllIDs()
       .then((ids) => {
-        if (!ids) return { [START_PAGE_NUMBER]: [] };
-        return generatePages(ids, DATA_LIMIT);
+        if (!ids) return [];
+        return chunk(ids, DATA_LIMIT);
       })
       .then((data) => {
         setPages(data);
-        if (!data[1].length) return []; // Переделать
+        setPagesCount(data.length || 1);
+        if (!data.length) return [];
         return getItems(data, START_PAGE_NUMBER) || [];
       })
       .then((items) => setProducts(items))
@@ -60,9 +60,10 @@ const App = () => {
 
     const getIds = actions[mode];
     const ids = await getIds();
-    const newPages = generatePages(ids, DATA_LIMIT);
+    const newPages = chunk(ids, DATA_LIMIT);
     setPageNumber(START_PAGE_NUMBER);
     setPages(newPages);
+    setPagesCount(newPages.length || 1);
 
     // Запрашиваем товары только если есть id
     const items = ids.length ? (await getItems(newPages, START_PAGE_NUMBER) || []) : [];
