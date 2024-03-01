@@ -74,8 +74,7 @@ const App = () => {
   };
 
   const paginatorProps = {
-    onNextClick: () => handleChangePage(pageNumber + 1),
-    onPreviousClick: () => handleChangePage(pageNumber - 1),
+    changePage: handleChangePage,
     pageNumber,
     pagesCount,
     isLoading,

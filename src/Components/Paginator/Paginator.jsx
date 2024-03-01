@@ -2,8 +2,7 @@ import styles from './Paginator.module.css';
 
 const Paginator = (props) => {
   const {
-    onNextClick,
-    onPreviousClick,
+    changePage,
     pageNumber,
     pagesCount,
     isLoading,
@@ -11,6 +10,9 @@ const Paginator = (props) => {
 
   const isPreviousDisabled = isLoading || pageNumber === 1;
   const isNextDisabled = isLoading || pageNumber === pagesCount;
+
+  const increasePage = () => changePage(pageNumber + 1);
+  const decreasePage = () => changePage(pageNumber - 1);
 
   const pageText = pagesCount > 0
     ? `Страница ${pageNumber} из ${pagesCount}`
@@ -22,7 +24,7 @@ const Paginator = (props) => {
       <button
         type="button"
         className={`${styles.pageButton} ${styles.previous}`}
-        onClick={onPreviousClick}
+        onClick={decreasePage}
         disabled={isPreviousDisabled}
       >
         <span>&#8249;</span>
@@ -35,7 +37,7 @@ const Paginator = (props) => {
       <button
         type="button"
         className={`${styles.pageButton} ${styles.next}`}
-        onClick={onNextClick}
+        onClick={increasePage}
         disabled={isNextDisabled}
       >
         <span>&#8250;</span>
