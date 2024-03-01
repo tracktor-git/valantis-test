@@ -1,5 +1,23 @@
 import styles from './Paginator.module.css';
 
+const ChangePageButton = ({ disabled, onClick, direction }) => {
+  const map = {
+    next: <span>&#8250;</span>,
+    previous: <span>&#8249;</span>,
+  };
+
+  return (
+    <button
+      type="button"
+      className={`${styles.pageButton} ${styles[direction]}`}
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {map[direction]}
+    </button>
+  );
+};
+
 const Paginator = (props) => {
   const {
     changePage,
@@ -20,29 +38,11 @@ const Paginator = (props) => {
 
   return (
     <div className={styles.paginatorWrapper}>
-
-      <button
-        type="button"
-        className={`${styles.pageButton} ${styles.previous}`}
-        onClick={decreasePage}
-        disabled={isPreviousDisabled}
-      >
-        <span>&#8249;</span>
-      </button>
-
+      <ChangePageButton direction="previous" onClick={decreasePage} disabled={isPreviousDisabled} />
       <div className={styles.pageNumber}>
         <span>{pageText}</span>
       </div>
-
-      <button
-        type="button"
-        className={`${styles.pageButton} ${styles.next}`}
-        onClick={increasePage}
-        disabled={isNextDisabled}
-      >
-        <span>&#8250;</span>
-      </button>
-
+      <ChangePageButton direction="next" onClick={increasePage} disabled={isNextDisabled} />
     </div>
   );
 };
