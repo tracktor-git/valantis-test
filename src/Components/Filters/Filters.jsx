@@ -113,7 +113,12 @@ const Filters = ({ isFiltered, isLoading, handleFilters }) => {
     <div className={styles.filters}>
       <span>Фильтровать данные:</span>
 
-      <select ref={selectRef} defaultValue={selectedFilter} onChange={handleChangeFilter}>
+      <select
+        ref={selectRef}
+        defaultValue={selectedFilter}
+        onChange={handleChangeFilter}
+        disabled={isLoading}
+      >
         <option value="" disabled>Выберите фильтр</option>
         <option value="brand">По бренду</option>
         <option value="price">По цене</option>
