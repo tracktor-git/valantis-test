@@ -42,3 +42,33 @@
 	color: #404040;
 	font-size: 16px;
 }
+
+.goToPage label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+}
+
+.goToPage input {
+	width: 60px;
+	height: 30px;
+	padding: 5px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	outline: none;
+	text-align: center;
+}
+
+.go {
+	height: 30px;
+	padding: 5px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.goToPage input[disabled],
+.go[disabled] {
+	cursor: not-allowed;
+}
