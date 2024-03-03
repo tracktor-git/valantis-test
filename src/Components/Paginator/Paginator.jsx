@@ -3,8 +3,8 @@ import styles from './Paginator.module.css';
 
 const ChangePageButton = ({ disabled, onClick, direction }) => {
   const map = {
-    next: <span>&#8250;</span>,
-    previous: <span>&#8249;</span>,
+    next: <span>&#8250;</span>, // >
+    previous: <span>&#8249;</span>, // <
   };
 
   return (
@@ -21,6 +21,11 @@ const ChangePageButton = ({ disabled, onClick, direction }) => {
 
 const GoToPage = ({ isLoading, maxValue, onSubmit }) => {
   const [value, setValue] = React.useState();
+  const formRef = React.useRef(null);
+
+  if (maxValue < 2) {
+    return null;
+  }
 
   const handleChange = (event) => {
     setValue(Number(event.target.value));
@@ -28,12 +33,12 @@ const GoToPage = ({ isLoading, maxValue, onSubmit }) => {
 
   const handleGoToPage = (event) => {
     event.preventDefault();
-    onSubmit(value);
+    onSubmit(value, formRef.current);
   };
 
   return (
     <div className={styles.goToPage}>
-      <form onSubmit={handleGoToPage}>
+      <form ref={formRef} onSubmit={handleGoToPage}>
         <label htmlFor="pageNumber">
           <span>На страницу:</span>
           <input id="pageNumber" required type="number" min={1} max={maxValue} onChange={handleChange} disabled={isLoading} />
@@ -62,15 +67,16 @@ const Paginator = (props) => {
     ? `Страница ${pageNumber} из ${pagesCount}`
     : 'Страница ... из ...';
 
-  const handleGoToPage = (value) => {
-    if (value !== pageNumber) {
-      changePage(value);
+  const handleGoToPage = (newPageNumber, form) => {
+    if (newPageNumber !== pageNumber) {
+      changePage(newPageNumber);
+      form.reset();
     }
   };
 
   return (
-    <>
-      <div className={styles.paginatorWrapper}>
+    <div className={styles.wrapper}>
+      <div className={styles.pagination}>
         <ChangePageButton direction="previous" onClick={decreasePage} disabled={isPreviousDisabled} />
         <div className={styles.pageNumber}>
           <span>{pageText}</span>
@@ -78,7 +84,7 @@ const Paginator = (props) => {
         <ChangePageButton direction="next" onClick={increasePage} disabled={isNextDisabled} />
       </div>
       <GoToPage isLoading={isLoading} maxValue={pagesCount} onSubmit={handleGoToPage} />
-    </>
+    </div>
   );
 };
 
