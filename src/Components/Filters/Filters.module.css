@@ -35,3 +35,10 @@
 	justify-content: center;
 	gap: 5px;
 }
+
+@media (max-width: 920px) {
+	.filters {
+		flex-direction: column;
+		gap: 7px;
+	}
+}
