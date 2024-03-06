@@ -25,6 +25,8 @@ const axiosOptions = {
   },
 };
 
+const uniq = (coll) => Array.from(new Set(coll));
+
 export const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
   if (index % size === 0) {
     const part = array.slice(index, index + size);
@@ -43,9 +45,9 @@ export const generatePages = (ids, limit) => {
 
 export const getBrands = async (attempts = 1) => {
   try {
-    const response = await await axios.post(API_URL, { action: 'get_fields', params: { field: 'brand' } }, axiosOptions);
-    const brands = Array.from(new Set(response.data.result.filter((name) => name !== null)));
-    return brands;
+    const { data } = await await axios.post(API_URL, { action: 'get_fields', params: { field: 'brand' } }, axiosOptions);
+    const brandNames = uniq(data.result).filter((name) => name !== null);
+    return brandNames;
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении наименований брендов:', error.message);
