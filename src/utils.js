@@ -60,7 +60,7 @@ const handleErrors = (error, consoleText) => {
 
 export const getBrands = async (attempts = 1) => {
   try {
-    const { data } = await await axios.post(API_URL, { action: 'get_fields', params: { field: 'brand' } }, axiosOptions);
+    const { data } = await axios.post(API_URL, { action: 'get_fields', params: { field: 'brand' } }, axiosOptions);
     const brandNames = uniq(data.result).filter((name) => name !== null);
     return brandNames;
   } catch (error) {
