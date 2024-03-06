@@ -30,8 +30,11 @@ const App = () => {
       .then((data) => {
         setPages(data);
         setPagesCount(data.length || 1);
+
         if (!data.length) return [];
-        return getItems(data, START_PAGE_NUMBER) || [];
+
+        const idList = data[START_PAGE_NUMBER - 1];
+        return getItems(idList) || [];
       })
       .then((items) => setProducts(items))
       .finally(() => setIsLoading(false));
@@ -40,7 +43,8 @@ const App = () => {
   const handleChangePage = async (newPageNumber) => {
     setIsLoading(true);
 
-    const items = await getItems(pages, newPageNumber) || [];
+    const idList = pages[newPageNumber - 1];
+    const items = await getItems(idList) || [];
     setProducts(items);
 
     if (items.length) {
@@ -66,7 +70,8 @@ const App = () => {
     setPagesCount(newPages.length || 1);
 
     // Запрашиваем товары только если есть id
-    const items = ids.length ? (await getItems(newPages, START_PAGE_NUMBER) || []) : [];
+    const idList = newPages[START_PAGE_NUMBER - 1];
+    const items = ids.length ? (await getItems(idList) || []) : [];
     setProducts(items);
     setIsFiltered(mode === 'apply');
 

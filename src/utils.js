@@ -88,12 +88,14 @@ export const getAllIDs = async (attempts = 1) => {
   return null;
 };
 
-export const getItems = async (pages, pageNumber, attempts = 1) => {
-  const pageIndex = pageNumber - 1;
-  const params = { ids: pages[pageIndex] };
+export const getItems = async (idList, attempts = 1) => {
+  const postData = {
+    action: 'get_items',
+    params: { ids: idList },
+  };
 
   try {
-    const newProducts = await axios.post(API_URL, { action: 'get_items', params }, axiosOptions);
+    const newProducts = await axios.post(API_URL, postData, axiosOptions);
     const data = newProducts.data.result;
     const filteredData = data
       .filter((product, index) => index === data.findIndex((item) => item.id === product.id));
@@ -110,7 +112,7 @@ export const getItems = async (pages, pageNumber, attempts = 1) => {
     console.warn(attempts, 'Не удалось получить список товаров', error.response.data);
 
     if (attempts < 5) {
-      const retryResult = await getItems(pages, pageNumber, attempts + 1);
+      const retryResult = await getItems(idList, attempts + 1);
       return retryResult;
     }
   }
@@ -118,10 +120,13 @@ export const getItems = async (pages, pageNumber, attempts = 1) => {
 };
 
 export const getFilteredIDs = async (field, value, attempts = 1) => {
-  const params = { [field]: value || null };
+  const postData = {
+    action: 'filter',
+    params: { [field]: value || null },
+  };
 
   try {
-    const response = await axios.post(API_URL, { action: 'filter', params }, axiosOptions);
+    const response = await axios.post(API_URL, postData, axiosOptions);
     const ids = response.data.result;
     const uniqIDs = new Set(ids);
     return Array.from(uniqIDs);
