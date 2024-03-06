@@ -27,6 +27,9 @@ const axiosOptions = {
 
 const uniq = (coll) => Array.from(new Set(coll));
 
+const filterItems = (items) => items
+  .filter((item, index) => index === items.findIndex(({ id }) => id === item.id));
+
 export const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
   if (index % size === 0) {
     const part = array.slice(index, index + size);
@@ -43,27 +46,32 @@ export const generatePages = (ids, limit) => {
   return pages.reduce((acc, array, index) => ({ ...acc, [index + 1]: array }), initialAcc);
 };
 
+const handleErrors = (error, consoleText) => {
+  if (!(error instanceof axios.AxiosError)) {
+    console.error(consoleText, error.message);
+  }
+
+  if (error.code === 'ERR_NETWORK') {
+    console.error('Ошибка сети', error.message);
+  }
+
+  console.warn(consoleText, error.response.data);
+};
+
 export const getBrands = async (attempts = 1) => {
   try {
     const { data } = await await axios.post(API_URL, { action: 'get_fields', params: { field: 'brand' } }, axiosOptions);
     const brandNames = uniq(data.result).filter((name) => name !== null);
     return brandNames;
   } catch (error) {
-    if (!(error instanceof axios.AxiosError)) {
-      console.error('Ошибка при получении наименований брендов:', error.message);
-    }
-
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Ошибка сети', error.message);
-    }
-
-    console.warn(attempts, 'Не удалось получить список наименований брендов', error.response.data);
+    handleErrors(error, 'Ошибка при получении наименований брендов:');
 
     if (attempts < 5) {
       const retryResult = await getBrands(attempts + 1);
       return retryResult;
     }
   }
+
   return null;
 };
 
@@ -73,25 +81,16 @@ export const getAllIDs = async (attempts = 1) => {
     const ids = uniq(data.result);
     return ids;
   } catch (error) {
-    if (!(error instanceof axios.AxiosError)) {
-      console.error('Ошибка при получении идентификаторов товаров:', error.message);
-    }
-
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Ошибка сети', error.message);
-    }
+    handleErrors(error, 'Ошибка при получении идентификаторов товаров:');
 
     if (attempts < 5) {
-      console.warn(attempts, 'Не удалось получить список ID', error.response.data);
       const retryResult = await getAllIDs(attempts + 1);
       return retryResult;
     }
   }
+
   return null;
 };
-
-const filterItems = (items) => items
-  .filter((item, index) => index === items.findIndex(({ id }) => id === item.id));
 
 export const getItems = async (idList, attempts = 1) => {
   const postData = {
@@ -105,21 +104,14 @@ export const getItems = async (idList, attempts = 1) => {
     const filteredData = filterItems(data);
     return filteredData;
   } catch (error) {
-    if (!(error instanceof axios.AxiosError)) {
-      console.error('Ошибка при получении списка товаров:', error.message);
-    }
-
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Ошибка сети', error.message);
-    }
-
-    console.warn(attempts, 'Не удалось получить список товаров', error.response.data);
+    handleErrors(error, 'Ошибка при получении списка товаров:');
 
     if (attempts < 5) {
       const retryResult = await getItems(idList, attempts + 1);
       return retryResult;
     }
   }
+
   return null;
 };
 
@@ -134,20 +126,13 @@ export const getFilteredIDs = async (field, value, attempts = 1) => {
     const ids = uniq(response.data.result);
     return ids;
   } catch (error) {
-    if (!(error instanceof axios.AxiosError)) {
-      console.error('Ошибка при получении фильтрованных данных:', error.message);
-    }
-
-    if (error.code === 'ERR_NETWORK') {
-      console.error('Ошибка сети', error.message);
-    }
-
-    console.warn(attempts, 'Не удалось получить фильтрованные данные', error.response.data);
+    handleErrors(error, 'Ошибка при получении фильтрованных данных:');
 
     if (attempts < 5) {
       const retryResult = await getFilteredIDs(field, value, attempts + 1);
       return retryResult;
     }
   }
+
   return null;
 };
