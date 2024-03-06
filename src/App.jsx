@@ -20,24 +20,25 @@ const App = () => {
   const [pages, setPages] = React.useState([]);
 
   React.useEffect(() => {
-    setIsLoading(true);
+    const startLoad = async () => {
+      setIsLoading(true);
 
-    getAllIDs()
-      .then((ids) => {
-        if (!ids) return [];
-        return chunk(ids, DATA_LIMIT);
-      })
-      .then((data) => {
-        setPages(data);
-        setPagesCount(data.length || 1);
+      const ids = await getAllIDs() || [];
 
-        if (!data.length) return [];
+      if (ids.length > 0) {
+        const chunks = chunk(ids, DATA_LIMIT);
+        setPages(chunks);
+        setPagesCount(chunks.length || 1);
 
-        const idList = data[START_PAGE_NUMBER - 1];
-        return getItems(idList) || [];
-      })
-      .then((items) => setProducts(items))
-      .finally(() => setIsLoading(false));
+        const idList = chunks[START_PAGE_NUMBER - 1];
+        const items = await getItems(idList) || [];
+        setProducts(items);
+      }
+
+      setIsLoading(false);
+    };
+
+    startLoad();
   }, []);
 
   const handleChangePage = async (newPageNumber) => {
