@@ -90,9 +90,10 @@ export const getAllIDs = async (attempts = 1) => {
 
 export const getItems = async (pages, pageNumber, attempts = 1) => {
   const pageIndex = pageNumber - 1;
+  const params = { ids: pages[pageIndex] };
 
   try {
-    const newProducts = await axios.post(API_URL, { action: 'get_items', params: { ids: pages[pageIndex] } }, axiosOptions);
+    const newProducts = await axios.post(API_URL, { action: 'get_items', params }, axiosOptions);
     const data = newProducts.data.result;
     const filteredData = data
       .filter((product, index) => index === data.findIndex((item) => item.id === product.id));
@@ -117,10 +118,13 @@ export const getItems = async (pages, pageNumber, attempts = 1) => {
 };
 
 export const getFilteredIDs = async (field, value, attempts = 1) => {
+  const params = { [field]: value || null };
+
   try {
-    const response = await axios.post(API_URL, { action: 'filter', params: { [field]: value || null } }, axiosOptions);
+    const response = await axios.post(API_URL, { action: 'filter', params }, axiosOptions);
     const ids = response.data.result;
-    return Array.from(new Set(ids));
+    const uniqIDs = new Set(ids);
+    return Array.from(uniqIDs);
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении фильтрованных данных:', error.message);
