@@ -70,7 +70,7 @@ export const getBrands = async (attempts = 1) => {
 export const getAllIDs = async (attempts = 1) => {
   try {
     const { data } = await axios.post(API_URL, { action: 'get_ids', params: { offset: 1 } }, axiosOptions);
-    const ids = Array.from(new Set(data.result));
+    const ids = uniq(data.result);
     return ids;
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
@@ -90,6 +90,9 @@ export const getAllIDs = async (attempts = 1) => {
   return null;
 };
 
+const filterItems = (items) => items
+  .filter((item, index) => index === items.findIndex(({ id }) => id === item.id));
+
 export const getItems = async (idList, attempts = 1) => {
   const postData = {
     action: 'get_items',
@@ -99,8 +102,7 @@ export const getItems = async (idList, attempts = 1) => {
   try {
     const newProducts = await axios.post(API_URL, postData, axiosOptions);
     const data = newProducts.data.result;
-    const filteredData = data
-      .filter((product, index) => index === data.findIndex((item) => item.id === product.id));
+    const filteredData = filterItems(data);
     return filteredData;
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
@@ -129,9 +131,8 @@ export const getFilteredIDs = async (field, value, attempts = 1) => {
 
   try {
     const response = await axios.post(API_URL, postData, axiosOptions);
-    const ids = response.data.result;
-    const uniqIDs = new Set(ids);
-    return Array.from(uniqIDs);
+    const ids = uniq(response.data.result);
+    return ids;
   } catch (error) {
     if (!(error instanceof axios.AxiosError)) {
       console.error('Ошибка при получении фильтрованных данных:', error.message);
