@@ -49,23 +49,15 @@ const GoToPage = ({ isLoading, maxValue, onSubmit }) => {
   );
 };
 
-const Paginator = (props) => {
-  const {
-    changePage,
-    pageNumber,
-    pagesCount,
-    isLoading,
-  } = props;
-
+const Paginator = ({
+  changePage, pageNumber, pagesCount, isLoading,
+}) => {
   const isPreviousDisabled = isLoading || pageNumber === 1;
   const isNextDisabled = isLoading || pageNumber === pagesCount;
+  const pageText = pagesCount > 0 ? `Страница ${pageNumber} из ${pagesCount}` : 'Страница ... из ...';
 
   const increasePage = () => changePage(pageNumber + 1);
   const decreasePage = () => changePage(pageNumber - 1);
-
-  const pageText = pagesCount > 0
-    ? `Страница ${pageNumber} из ${pagesCount}`
-    : 'Страница ... из ...';
 
   const handleGoToPage = (newPageNumber, form) => {
     if (newPageNumber !== pageNumber) {
@@ -78,9 +70,7 @@ const Paginator = (props) => {
     <div className={styles.wrapper}>
       <div className={styles.pagination}>
         <ChangePageButton direction="previous" onClick={decreasePage} disabled={isPreviousDisabled} />
-        <div className={styles.pageNumber}>
-          <span>{pageText}</span>
-        </div>
+        <div className={styles.pageNumber}>{pageText}</div>
         <ChangePageButton direction="next" onClick={increasePage} disabled={isNextDisabled} />
       </div>
       <GoToPage isLoading={isLoading} maxValue={pagesCount} onSubmit={handleGoToPage} />
