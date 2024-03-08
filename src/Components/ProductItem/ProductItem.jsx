@@ -16,23 +16,23 @@ const ProductItem = ({ data }) => {
   return (
     <div className={styles.productCard}>
       <div className={styles.productHeader}>
-        <div className={styles.productTitle}>{product || 'Нет названия'}</div>
-        <div className={styles.productId}>{`ID: ${id || 'Нет ID'}`}</div>
+        <p className={styles.productTitle}>{product || 'Нет названия'}</p>
+        <p className={styles.productId}>{`ID: ${id || 'Нет ID'}`}</p>
       </div>
 
-      <div className={styles.productImage}>
+      <p className={styles.productImage}>
         <img src={noImage} alt="Product" />
-      </div>
+      </p>
 
-      <div className={styles.productBrand}>
+      <p className={styles.productBrand}>
         <strong>Бренд:</strong>
         <span>{` ${brand || 'Не указан'}`}</span>
-      </div>
+      </p>
 
-      <div className={styles.productPrice}>
+      <p className={styles.productPrice}>
         <strong>Цена:</strong>
         <span>{` ${formattedPrice}`}</span>
-      </div>
+      </p>
 
     </div>
 

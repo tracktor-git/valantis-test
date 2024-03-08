@@ -30,6 +30,18 @@ const uniq = (coll) => Array.from(new Set(coll));
 const filterItems = (items) => items
   .filter((item, index) => index === items.findIndex(({ id }) => id === item.id));
 
+const handleErrors = (error, consoleText) => {
+  if (!(error instanceof axios.AxiosError)) {
+    console.error(consoleText, error.message);
+  }
+
+  if (error.code === 'ERR_NETWORK') {
+    console.error('Ошибка сети', error.message);
+  }
+
+  console.warn(consoleText, error.response.data);
+};
+
 export const chunk = (array, size = 1) => array.reduce((acc, _, index) => {
   if (index % size === 0) {
     const part = array.slice(index, index + size);
@@ -44,18 +56,6 @@ export const generatePages = (ids, limit) => {
 
   const pages = chunk(ids, limit);
   return pages.reduce((acc, array, index) => ({ ...acc, [index + 1]: array }), initialAcc);
-};
-
-const handleErrors = (error, consoleText) => {
-  if (!(error instanceof axios.AxiosError)) {
-    console.error(consoleText, error.message);
-  }
-
-  if (error.code === 'ERR_NETWORK') {
-    console.error('Ошибка сети', error.message);
-  }
-
-  console.warn(consoleText, error.response.data);
 };
 
 export const getBrands = async (attempts = 1) => {

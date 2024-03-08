@@ -17,7 +17,7 @@ const App = () => {
   const [isFiltered, setIsFiltered] = React.useState(false);
   const [pageNumber, setPageNumber] = React.useState(START_PAGE_NUMBER);
   const [pagesCount, setPagesCount] = React.useState(0);
-  const [pages, setPages] = React.useState([]);
+  const [idsChunks, setIdsChunks] = React.useState([]);
 
   React.useEffect(() => {
     const startLoad = async () => {
@@ -27,7 +27,7 @@ const App = () => {
 
       if (ids.length > 0) {
         const chunks = chunk(ids, DATA_LIMIT);
-        setPages(chunks);
+        setIdsChunks(chunks);
         setPagesCount(chunks.length || 1);
 
         const idList = chunks[START_PAGE_NUMBER - 1];
@@ -44,7 +44,7 @@ const App = () => {
   const handleChangePage = async (newPageNumber) => {
     setIsLoading(true);
 
-    const idList = pages[newPageNumber - 1];
+    const idList = idsChunks[newPageNumber - 1];
     const items = await getItems(idList) || [];
     setProducts(items);
 
@@ -65,37 +65,37 @@ const App = () => {
 
     const getIds = actions[mode];
     const ids = await getIds();
-    const newPages = chunk(ids, DATA_LIMIT);
+    const chunks = chunk(ids, DATA_LIMIT);
     setPageNumber(START_PAGE_NUMBER);
-    setPages(newPages);
-    setPagesCount(newPages.length || 1);
+    setIdsChunks(chunks);
+    setPagesCount(chunks.length || 1);
 
     // Запрашиваем товары только если есть id
-    const idList = newPages[START_PAGE_NUMBER - 1];
-    const items = ids.length ? (await getItems(idList) || []) : [];
+    const idList = chunks[START_PAGE_NUMBER - 1];
+    const items = ids.length ? await getItems(idList) : [];
     setProducts(items);
     setIsFiltered(mode === 'apply');
 
     setIsLoading(false);
   };
 
-  const paginatorProps = {
-    changePage: handleChangePage,
-    pageNumber,
-    pagesCount,
-    isLoading,
-  };
+  const pageNavigation = (
+    <Paginator
+      changePage={handleChangePage}
+      pageNumber={pageNumber}
+      pagesCount={pagesCount}
+      isLoading={isLoading}
+    />
+  );
 
   return (
     <main>
       <div className="container">
         <Header />
-        <Paginator {...paginatorProps} />
+        {pageNavigation}
         <Filters handleFilters={handleFilters} isFiltered={isFiltered} isLoading={isLoading} />
         <Products isLoading={isLoading} products={products} />
-        {
-          !isLoading && <Paginator {...paginatorProps} />
-        }
+        {!isLoading && pageNavigation}
       </div>
     </main>
   );
